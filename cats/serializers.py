@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from .models import Cat
+from .models import Cat, Owner
+
 
 # сериализатор для модели Cat
 class CatSerializer(serializers.ModelSerializer):
