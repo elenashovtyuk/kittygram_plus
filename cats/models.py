@@ -1,6 +1,14 @@
 from django.db import models
 
 
+# cоздаем модель, которая хранит информацию о достижениях кота
+class Achievement(models.Model):
+    name = models.CharField(max_length=64)
+
+    def __str__(self):
+        return self.name
+
+
 # создаем класс, в котором будет храниться информация
 # о хозяинах котов
 class Owner(models.Model):
@@ -17,10 +25,26 @@ class Cat(models.Model):
     name = models.CharField(max_length=16)
     color = models.CharField(max_length=16)
     birth_year = models.IntegerField()
-    # добавим новое поле в модели
-    # это поле связано с моделью Owner
+    # добавим новое поле, которое будет связывть
+    # модель Cat с моделью Owner
     owner = models.ForeignKey(
         Owner, related_name='cats', on_delete=models.CASCADE)
+    # также добавим поле,
+    # которое будет связывать модель Cat с моделью Achievement
+    achievements = models.ManyToManyField(
+        Achievement, through='AchievementCat')
 
     def __str__(self):
         return self.name
+
+
+# создаем новый класс Achivments
+# в котором будет связаны id котика и id его достижения
+# это промежуточная модель для обеспечения связи
+# между моделями Cat и Achievement
+class AchievementCat(models.Model):
+    achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE)
+    cat = models.ForeignKey(Cat, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.achievement} {self.cat}'
