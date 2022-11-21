@@ -10,6 +10,7 @@ class Owner(models.Model):
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
 
+
 # создаем класс, в котором будет храниться информация
 # о котах
 class Cat(models.Model):
@@ -19,8 +20,7 @@ class Cat(models.Model):
     # добавим новое поле в модели
     # это поле связано с моделью Owner
     owner = models.ForeignKey(
-        Owner, related_name='cats', on_delete=models.Cascade)
-    )
+        Owner, related_name='cats', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
