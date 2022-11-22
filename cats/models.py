@@ -1,6 +1,14 @@
 from django.db import models
 
 
+CHOICES = (
+        ('Gray', 'Серый'),
+        ('Black', 'Чёрный'),
+        ('White', 'Белый'),
+        ('Ginger', 'Рыжий'),
+        ('Mixed', 'Смешанный'),
+    )
+
 # cоздаем модель, которая хранит информацию о достижениях кота
 class Achievement(models.Model):
     name = models.CharField(max_length=64)
@@ -23,7 +31,7 @@ class Owner(models.Model):
 # о котах
 class Cat(models.Model):
     name = models.CharField(max_length=16)
-    color = models.CharField(max_length=16)
+    color = models.CharField(max_length=16, choices=CHOICES)
     birth_year = models.IntegerField()
     # добавим новое поле, которое будет связывть
     # модель Cat с моделью Owner
