@@ -31,6 +31,7 @@ class Cat(models.Model):
         Owner, related_name='cats', on_delete=models.CASCADE)
     # также добавим поле,
     # которое будет связывать модель Cat с моделью Achievement
+    # через вспомогательную модель AchievementCat
     achievements = models.ManyToManyField(
         Achievement, through='AchievementCat')
 
