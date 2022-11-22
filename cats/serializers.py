@@ -1,5 +1,5 @@
 import datetime as dt
-import webcolors
+# import webcolors
 from rest_framework import serializers
 
 # импортируем нужные для работы модели
@@ -8,29 +8,30 @@ from .models import Cat, Owner, Achievement, AchievementCat
 
 # сериализатор для модели Achievement
 class AchievementSerializer(serializers.ModelSerializer):
+    achievement_name = serializers.CharField(source='name')
 
     class Meta:
         model = Achievement
-        fields = ('id', 'name')
+        fields = ('id', 'achievement_name')
 
 
-# опишем новый тип поля Hex2NameColor
-class Hex2NameColor(serializers.Field):
-    # при чтении данных ничего не меняем -
-    # просто возвращаем как есть
-    def to_representation(self, value):
-        return value
-    # при записи код цвета конвертируется в его название
-    def to_internal_value(self, data):
-        # проверяем
-        try:
-            # если имя цвета существует, то конвертируем код в название
-            data = webcolors.hex_to_name(data)
-        except ValueError:
-            # иначе возвращаем ошибку
-            raise serializers.ValidationError('Для этого цвета нет имени')
-        # возвращаем данные в новом формате
-        return data
+# # опишем новый тип поля Hex2NameColor
+# class Hex2NameColor(serializers.Field):
+#     # при чтении данных ничего не меняем -
+#     # просто возвращаем как есть
+#     def to_representation(self, value):
+#         return value
+#     # при записи код цвета конвертируется в его название
+#     def to_internal_value(self, data):
+#         # проверяем
+#         try:
+#             # если имя цвета существует, то конвертируем код в название
+#             data = webcolors.hex_to_name(data)
+#         except ValueError:
+#             # иначе возвращаем ошибку
+#             raise serializers.ValidationError('Для этого цвета нет имени')
+#         # возвращаем данные в новом формате
+#         return data
 
 
 # сериализатор для модели Cat
@@ -50,7 +51,7 @@ class CatSerializer(serializers.ModelSerializer):
     # после создания класса Hex2NameColor можем добавитть
     # это новое пользовательское поле в CatSerializer
     # таким образом переопределяем поле color
-    color = Hex2NameColor()
+    # color = Hex2NameColor()
 
     class Meta:
         model = Cat
