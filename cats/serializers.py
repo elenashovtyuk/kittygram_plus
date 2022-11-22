@@ -1,19 +1,77 @@
 from rest_framework import serializers
 
-from .models import Cat, Owner
+
+# импортируем нужные для работы модели
+from .models import Cat, Owner, Achievement, AchievementCat
+
+
+# сериализатор для модели Achievement
+class AchievementSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Achievement
+        fields = ('id', 'name')
 
 
 # сериализатор для модели Cat
 class CatSerializer(serializers.ModelSerializer):
 
+    # Убираем owner = serializers.StringRelatedField(read_only=True)
+    # переопределяем поле achievements.
+    # Теперь это поле будет получать объекты Achievement,
+    # сериализованные в AchievementSerializer
+    # достижений у котика может быть много, поэтому добавляем аттрибут
+    # many=True
+    # кроме того, так как поле achievements не должно быть обязательным
+    # нужно явно его переопределить - указать аттрибут required=False
+    achievements = AchievementSerializer(many=True, required=False)
+
     class Meta:
         model = Cat
-        fields = ('id', 'name', 'color', 'birth_year')
+        fields = ('id', 'name', 'color', 'birth_year', 'owner', 'achievements')
+
+    # чтобы настроить сохранение данных, нужно переопределить метод create()
+    # в сериализаторе
+    # validated_data - это словарь с проверенными данными, полученными
+    # в результате POST-запроса
+    def create(self, validated_data):
+        # проверим - пришло в запросе поле achievement или нет
+        # и в зависимости от результата будем сохранять котика
+        # с достижениями или без
+        # если такого поля нет, то создаем запись о котике без его достижений
+
+        if 'achievements' not in self.initial_data:
+            cat = Cat.objects.create(**validated_data)
+            return cat
+
+        # иначе делаем следующее:
+
+        # уберем список достижений из списка serializer.validated_data
+        # и сохраним его в переменную achivement
+        achievements = validated_data.pop('achievements')
+
+        # дальше создаем нового котика пока без достижений
+        # **validated_data - распаковка словаря
+        cat = Cat.objects.create(**validated_data)
+
+        # для каждого достижения из списка достижений
+        for achievement in achievements:
+            # создадим новую запись(новое достижение) или получим
+            # существующий экземпляр из БД
+            # (существующее достижение котов)
+            current_achievement, status = Achievement.objects.get_or_create(
+                **achievement)
+            AchievementCat.objects.create(
+                achievement=current_achievement, cat=cat)
+        return cat
 
 
 # сериализатор для модели Owner
 class OwnerSerializer(serializers.ModelSerializer):
+    cats = serializers.StringRelatedField(many=True, read_only=True)
+# сериализаторы могут работать со связанными моделями
+# для этого укажем related_name cats в списке полей сериализатора
 
     class Meta:
         model = Owner
-        fields = ('first_name', 'last_name')
+        fields = ('first_name', 'last_name', 'cats')
