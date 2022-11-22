@@ -52,6 +52,7 @@ class CatSerializer(serializers.ModelSerializer):
     # это новое пользовательское поле в CatSerializer
     # таким образом переопределяем поле color
     # color = Hex2NameColor()
+    color = serializers.ChoiceField(chices=CHOICES)
 
     class Meta:
         model = Cat
