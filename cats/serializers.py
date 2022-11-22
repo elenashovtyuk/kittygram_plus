@@ -1,5 +1,6 @@
+import datetime as dt
+import webcolors
 from rest_framework import serializers
-
 
 # импортируем нужные для работы модели
 from .models import Cat, Owner, Achievement, AchievementCat
@@ -25,15 +26,20 @@ class CatSerializer(serializers.ModelSerializer):
     # кроме того, так как поле achievements не должно быть обязательным
     # нужно явно его переопределить - указать аттрибут required=False
     achievements = AchievementSerializer(many=True, required=False)
+    # добавим новое поле в сериалайзер (его нет в модели)
+    age = serializers.SerializerMethodField()
 
     class Meta:
         model = Cat
-        fields = ('id', 'name', 'color', 'birth_year', 'owner', 'achievements')
+        fields = ('id', 'name', 'color', 'birth_year', 'owner', 'achievements', 'age')
 
     # чтобы настроить сохранение данных, нужно переопределить метод create()
     # в сериализаторе
     # validated_data - это словарь с проверенными данными, полученными
     # в результате POST-запроса
+    def get_age(self, obj):
+        return dt.datetime.now().year - obj.birth_year
+
     def create(self, validated_data):
         # проверим - пришло в запросе поле achievement или нет
         # и в зависимости от результата будем сохранять котика
@@ -75,3 +81,22 @@ class OwnerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Owner
         fields = ('first_name', 'last_name', 'cats')
+
+
+# опишем новый тип поля Hex2NameColor
+class Hex2NameColor(serializers.Field):
+    # при чтении данных ничего не меняем -
+    # просто возвращаем как есть
+    def to_representation(self, value):
+        return value
+    # при записи код цвета конвертируется в его название
+    def to_internal_value(self, data):
+        # проверяем
+        try:
+            # если имя цвета существует, то конвертируем код в название
+            data = webcolors.hex_to_name(data)
+        except ValueError:
+            # иначе возвращаем ошибку
+            raise serializers.ValidationError('Для этого цвета нет имени')
+        # возвращаем данные в новом формате
+        return data
