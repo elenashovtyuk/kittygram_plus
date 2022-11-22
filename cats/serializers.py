@@ -14,6 +14,25 @@ class AchievementSerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 
+# опишем новый тип поля Hex2NameColor
+class Hex2NameColor(serializers.Field):
+    # при чтении данных ничего не меняем -
+    # просто возвращаем как есть
+    def to_representation(self, value):
+        return value
+    # при записи код цвета конвертируется в его название
+    def to_internal_value(self, data):
+        # проверяем
+        try:
+            # если имя цвета существует, то конвертируем код в название
+            data = webcolors.hex_to_name(data)
+        except ValueError:
+            # иначе возвращаем ошибку
+            raise serializers.ValidationError('Для этого цвета нет имени')
+        # возвращаем данные в новом формате
+        return data
+
+
 # сериализатор для модели Cat
 class CatSerializer(serializers.ModelSerializer):
 
@@ -28,6 +47,10 @@ class CatSerializer(serializers.ModelSerializer):
     achievements = AchievementSerializer(many=True, required=False)
     # добавим новое поле в сериалайзер (его нет в модели)
     age = serializers.SerializerMethodField()
+    # после создания класса Hex2NameColor можем добавитть
+    # это новое пользовательское поле в CatSerializer
+    # таким образом переопределяем поле color
+    color = Hex2NameColor()
 
     class Meta:
         model = Cat
@@ -81,22 +104,3 @@ class OwnerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Owner
         fields = ('first_name', 'last_name', 'cats')
-
-
-# опишем новый тип поля Hex2NameColor
-class Hex2NameColor(serializers.Field):
-    # при чтении данных ничего не меняем -
-    # просто возвращаем как есть
-    def to_representation(self, value):
-        return value
-    # при записи код цвета конвертируется в его название
-    def to_internal_value(self, data):
-        # проверяем
-        try:
-            # если имя цвета существует, то конвертируем код в название
-            data = webcolors.hex_to_name(data)
-        except ValueError:
-            # иначе возвращаем ошибку
-            raise serializers.ValidationError('Для этого цвета нет имени')
-        # возвращаем данные в новом формате
-        return data
