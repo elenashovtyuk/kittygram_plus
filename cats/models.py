@@ -9,6 +9,7 @@ CHOICES = (
         ('Mixed', 'Смешанный'),
     )
 
+
 # cоздаем модель, которая хранит информацию о достижениях кота
 class Achievement(models.Model):
     name = models.CharField(max_length=64)
