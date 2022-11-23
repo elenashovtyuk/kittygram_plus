@@ -35,7 +35,14 @@ class CatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cat
         fields = (
-            'id', 'name', 'color', 'birth_year', 'owner', 'achievements', 'age')
+            'id',
+            'name',
+            'color',
+            'birth_year',
+            'owner',
+            'achievements',
+            'age'
+        )
 
     # чтобы настроить сохранение данных, нужно переопределить метод create()
     # в сериализаторе
@@ -74,6 +81,14 @@ class CatSerializer(serializers.ModelSerializer):
             AchievementCat.objects.create(
                 achievement=current_achievement, cat=cat)
         return cat
+
+
+class CatListSerializer(serializers.ModelSerializer):
+    color = serializers.ChoiceField(choices=CHOICES)
+
+    class Meta:
+        model = Cat
+        fields = ('id', 'name', 'color')
 
 
 # сериализатор для модели Owner
