@@ -1,9 +1,9 @@
 import datetime as dt
-# import webcolors
+
 from rest_framework import serializers
 
 # импортируем нужные для работы модели
-from .models import Cat, Owner, Achievement, AchievementCat
+from .models import Cat, Owner, Achievement, AchievementCat, CHOICES
 
 
 # сериализатор для модели Achievement
@@ -13,25 +13,6 @@ class AchievementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Achievement
         fields = ('id', 'achievement_name')
-
-
-# # опишем новый тип поля Hex2NameColor
-# class Hex2NameColor(serializers.Field):
-#     # при чтении данных ничего не меняем -
-#     # просто возвращаем как есть
-#     def to_representation(self, value):
-#         return value
-#     # при записи код цвета конвертируется в его название
-#     def to_internal_value(self, data):
-#         # проверяем
-#         try:
-#             # если имя цвета существует, то конвертируем код в название
-#             data = webcolors.hex_to_name(data)
-#         except ValueError:
-#             # иначе возвращаем ошибку
-#             raise serializers.ValidationError('Для этого цвета нет имени')
-#         # возвращаем данные в новом формате
-#         return data
 
 
 # сериализатор для модели Cat
@@ -48,15 +29,13 @@ class CatSerializer(serializers.ModelSerializer):
     achievements = AchievementSerializer(many=True, required=False)
     # добавим новое поле в сериалайзер (его нет в модели)
     age = serializers.SerializerMethodField()
-    # после создания класса Hex2NameColor можем добавитть
-    # это новое пользовательское поле в CatSerializer
-    # таким образом переопределяем поле color
-    # color = Hex2NameColor()
-    color = serializers.ChoiceField(chices=CHOICES)
+    # Теперь поле примет только значение, упомянутое в списке CHOICES
+    color = serializers.ChoiceField(choices=CHOICES)
 
     class Meta:
         model = Cat
-        fields = ('id', 'name', 'color', 'birth_year', 'owner', 'achievements', 'age')
+        fields = (
+            'id', 'name', 'color', 'birth_year', 'owner', 'achievements', 'age')
 
     # чтобы настроить сохранение данных, нужно переопределить метод create()
     # в сериализаторе
